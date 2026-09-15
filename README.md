@@ -7,6 +7,12 @@ eye-closure** tracking and **eye/iris landmark overlay** from a laptop webcam
 It does **not** estimate precise gaze, drowsiness or driver attention — those
 are explicitly out of scope.
 
+## Screenshots
+
+![Demo output — head pose, blink and iris overlay](screenshots/demo-1.png)
+
+![Demo output — eye/iris landmarks and EAR readout](screenshots/demo-2.png)
+
 ## Setup
 
 ```powershell
