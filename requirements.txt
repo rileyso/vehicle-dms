@@ -1,0 +1,8 @@
+# Pinned after day-one smoke test on Windows 11, Python 3.14.4.
+# OpenCV 5.0 note: opencv-python (core cv2) and opencv-contrib-python
+# (contrib modules) are separate packages that coexist in 5.x.
+# mediapipe depends on opencv-contrib-python; we add opencv-python for core cv2.
+mediapipe==1.0.1
+opencv-python==5.0.0.93
+opencv-contrib-python==5.0.0.93
+numpy==2.5.3

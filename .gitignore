@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Downloaded model (re-download per README)
+models/
+
+# Local research notes (not for publication)
+RESEARCH.md
+
+# OS
+.DS_Store
+Thumbs.db
