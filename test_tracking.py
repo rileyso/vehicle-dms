@@ -11,6 +11,7 @@ import numpy as np
 
 from tracking import (
     BlinkTracker,
+    FACE_MODEL,
     HeadPoseTracker,
     HysteresisLabel,
     MODEL_INDICES,
@@ -130,6 +131,25 @@ def test_head_pose_synthetic():
     assert t.R_neutral is not None
 
 
+def test_head_pose_rejects_degenerate():
+    t = HeadPoseTracker(640, 480)
+    px = np.zeros((478, 3), dtype=np.float64)  # all landmarks at one point
+    assert t.estimate(px) is None
+
+
+def test_face_model_geometry():
+    """The 3D model must match image conventions (x=+right, y=+down)."""
+    m = FACE_MODEL
+    assert m[1] == (0.0, 0.0, 0.0)          # nose tip at origin
+    assert m[33][1] < 0 and m[263][1] < 0   # eyes above nose
+    assert m[152][1] > 0                    # chin below nose
+    assert m[61][1] > 0 and m[291][1] > 0   # mouth below nose
+    assert m[33][0] < m[263][0]             # 33 image-left of 263
+    assert m[61][0] < m[291][0]             # 61 image-left of 291
+    for k in (152, 33, 263, 61, 291):       # nose closest to camera
+        assert m[k][2] <= m[1][2]
+
+
 if __name__ == "__main__":
     check("ear geometry", test_ear_geometry)
     check("landmarks_to_pixels", test_landmarks_to_pixels)
@@ -137,4 +157,6 @@ if __name__ == "__main__":
     check("hysteresis label", test_hysteresis_label)
     check("euler_from_matrix", test_euler_from_matrix)
     check("head pose synthetic", test_head_pose_synthetic)
+    check("head pose rejects degenerate", test_head_pose_rejects_degenerate)
+    check("face model geometry", test_face_model_geometry)
     print(f"\n{PASS} checks passed")

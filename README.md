@@ -44,11 +44,12 @@ Flags: `--close` / `--reopen` (EAR thresholds, defaults 0.20 / 0.24),
   once on reopening if both eyes were closed 60–500 ms; longer closures are a
   separate "prolonged" count. Frame gaps > 100 ms or tracking loss reset any
   pending event. Timestamps are monotonic, never frame counts.
-- **Head orientation** — OpenCV `solvePnP` (ITERATIVE) on 6 face landmarks
-  against a generic symmetric 3D model, reported *relative to a captured
-  neutral pose* (`c` key). Yaw/pitch use enter ±15° / exit ±10° hysteresis with
-  300 ms persistence. Approximate: assumed focal length = image width, centred
-  principal point, zero distortion.
+- **Head orientation** — OpenCV `solvePnP` (EPnP) on 6 face landmarks against a
+  generic symmetric 3D model, reported *relative to a captured neutral pose*
+  (`c` key). Yaw/pitch use enter ±15° / exit ±10° hysteresis with 300 ms
+  persistence. Approximate: assumed focal length ≈ 0.8× image width, centred
+  principal point, zero distortion; implausible fits (face behind camera or
+  reprojection error > 10% of width) are rejected as unknown.
 - **Iris** — the 10 iris landmarks (5 per eye) overlaid; a normalized iris
   offset is shown but uncalibrated (not a gaze estimate).
 - **Unknown** — no face, unusable eyes or an implausible pose all show an

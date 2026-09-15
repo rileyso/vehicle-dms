@@ -25,7 +25,6 @@ from tracking import EYE_L, EYE_R, HeadPoseTracker, ear, landmarks_to_pixels
 
 DEFAULT_THRESHOLDS = [0.04, 0.06, 0.08, 0.10, 0.12, 0.15, 0.18, 0.20]
 BLINK_MIN_MS, BLINK_MAX_MS = 60, 500
-REPROJ_LIMIT = 20.0
 
 
 def load_gt(ann_path):
@@ -76,7 +75,7 @@ def process(video, landmarker, max_frames=None):
             if np.isfinite(el[f]) and np.isfinite(er[f]):
                 eye_frames += 1
             pose = head.estimate(px)
-            if pose is not None and pose["reproj_err"] <= REPROJ_LIMIT:
+            if pose is not None:
                 p_, y_, r_ = pose["euler_abs"]
                 yaws.append(np.degrees(y_))
                 pitches.append(np.degrees(p_))

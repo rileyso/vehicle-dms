@@ -33,8 +33,7 @@ from tracking import (
 MODEL_PATH = Path(__file__).parent / "models" / "face_landmarker.task"
 
 GAP_MS = 100.0           # frame gap above this = interrupted observation
-REPROJ_LIMIT = 20.0      # px; reject implausible PnP fits
-YAW = ("left", "neutral", "right")
+YAW = ("right", "neutral", "left")
 PITCH = ("down", "neutral", "up")
 ENTER_DEG, EXIT_DEG, PERSIST_MS = 15.0, 10.0, 300
 
@@ -145,8 +144,6 @@ def main():
 
         # --- head pose ---
         pose = head.estimate(px) if px is not None else None
-        if pose is not None and pose["reproj_err"] > REPROJ_LIMIT:
-            pose = None
 
         head_txt, yaw_deg, pitch_deg, roll_deg = "unknown", None, None, None
         if pose is not None:

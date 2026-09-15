@@ -31,15 +31,15 @@ IRIS_R = [468, 469, 470, 471, 472]
 
 # solvePnP correspondences: landmark index -> generic symmetric 3D face model.
 # Units are arbitrary (cm-ish); only the *shape* matters because orientation is
-# reported relative to a calibrated neutral pose. x: +image-right, y: +up,
-# z: +toward camera (nose tip closest).
+# reported relative to a calibrated neutral pose. x: +image-right, y: +down
+# (image convention), z: +toward camera (nose tip closest).
 FACE_MODEL = {
     1:   (0.0, 0.0, 0.0),     # nose tip
-    152: (0.0, -7.5, -1.5),   # chin
-    33:  (-3.0, 2.5, -3.0),   # right eye outer corner (image-left)
-    263: (3.0, 2.5, -3.0),    # left eye outer corner (image-right)
-    61:  (3.5, -4.0, -2.5),   # left mouth corner (image-right)
-    291: (-3.5, -4.0, -2.5),  # right mouth corner (image-left)
+    152: (0.0, 7.5, -1.5),    # chin (below nose -> +y)
+    33:  (-3.0, -2.5, -3.0),  # right eye outer corner (image-left, above)
+    263: (3.0, -2.5, -3.0),   # left eye outer corner (image-right, above)
+    61:  (-3.5, 4.0, -2.5),   # mouth corner, image-left (landmark 61)
+    291: (3.5, 4.0, -2.5),    # mouth corner, image-right (landmark 291)
 }
 MODEL_INDICES = sorted(FACE_MODEL)
 MODEL_PTS = np.array([FACE_MODEL[i] for i in MODEL_INDICES], dtype=np.float64)
@@ -165,7 +165,7 @@ class BlinkTracker:
 class HeadPoseTracker:
     """Approximate head orientation via OpenCV solvePnP.
 
-    Uses an assumed focal length (f = image width), centred principal point and
+    Uses an assumed focal length (0.8 * image width), centred principal point and
     zero distortion -- clearly labelled approximation, fine for a RELATIVE
     orientation demo against a calibrated neutral pose, not for degree-accurate
     absolute pose.
@@ -173,7 +173,8 @@ class HeadPoseTracker:
 
     def __init__(self, w, h):
         self.w, self.h = w, h
-        f = float(w)
+        # ~0.8 * width = ~64 deg HFOV assumption; fine for a RELATIVE demo only.
+        f = 0.8 * w
         self.K = np.array([[f, 0, w / 2], [0, f, h / 2], [0, 0, 1]],
                           dtype=np.float64)
         self.dist = np.zeros((4, 1), dtype=np.float64)
@@ -194,18 +195,25 @@ class HeadPoseTracker:
             return None
         if img_pts.shape[0] < 6 or not np.all(np.isfinite(img_pts)):
             return None
-        ok, rvec, tvec = cv2.solvePnP(MODEL_PTS, img_pts, self.K, self.dist,
-                                      flags=cv2.SOLVEPNP_ITERATIVE)
+        try:
+            ok, rvec, tvec = cv2.solvePnP(MODEL_PTS, img_pts, self.K, self.dist,
+                                          flags=cv2.SOLVEPNP_EPNP)
+        except cv2.error:
+            return None
         if not ok:
             return None
         rvec = np.asarray(rvec, dtype=np.float64).ravel()
         tvec = np.asarray(tvec, dtype=np.float64).ravel()
         if not (np.all(np.isfinite(rvec)) and np.all(np.isfinite(tvec))):
             return None
+        if not (0.0 < tvec[2] <= 500.0):  # face 0-5 m in front of the camera
+            return None
         R, _ = cv2.Rodrigues(rvec)
         proj, _ = cv2.projectPoints(MODEL_PTS, rvec, tvec, self.K, self.dist)
         err = float(np.mean(np.linalg.norm(proj.reshape(-1, 2) - img_pts,
                                            axis=1)))
+        if err > 0.1 * self.w:  # implausible fit (generic-model mismatch)
+            return None
         euler_abs = euler_from_matrix(R)
         euler_rel = None
         if self.R_neutral is not None:
