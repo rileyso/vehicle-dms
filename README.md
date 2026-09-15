@@ -1,11 +1,8 @@
-# driver monitoring demo
+# Gaze tracking for driver monitoring system
 
 A small demo: approximate **head orientation**, **blink /
 eye-closure** tracking and **eye/iris landmark overlay** from a laptop webcam
 (or a video file). Built with Python, OpenCV and MediaPipe Face Landmarker.
-
-It does **not** estimate precise gaze, drowsiness or driver attention — those
-are explicitly out of scope.
 
 ## Screenshots
 
