@@ -13,6 +13,9 @@ models/
 # Local research notes (not for publication)
 RESEARCH.md
 
+# Personal notes (untracked)
+IDEAS.md
+
 # OS
 .DS_Store
 Thumbs.db
