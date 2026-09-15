@@ -1,6 +1,6 @@
-# dms — driver monitoring demo
+# driver monitoring demo
 
-A small, honest university demo: approximate **head orientation**, **blink /
+A small demo: approximate **head orientation**, **blink /
 eye-closure** tracking and **eye/iris landmark overlay** from a laptop webcam
 (or a video file). Built with Python, OpenCV and MediaPipe Face Landmarker.
 
